@@ -19,6 +19,7 @@
   <description>api con spring boot</description>
   <modules>
     <module>usuario</module>
+    <module>notificacion</module>
   </modules>
 
   <properties>
