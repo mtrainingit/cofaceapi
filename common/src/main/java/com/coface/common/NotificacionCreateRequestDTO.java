@@ -1,4 +1,4 @@
-package com.coface.notificacion;
+package com.coface.common;
 
 public record NotificacionCreateRequestDTO(
         Long id,

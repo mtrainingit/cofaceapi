@@ -1,6 +1,6 @@
 package com.coface.usuario.service;
 
-import com.coface.usuario.api.dto.NotificacionCreateRequestDTO;
+import com.coface.common.NotificacionCreateRequestDTO;
 import com.coface.usuario.api.dto.UsuarioCreateRequestDTO;
 import com.coface.usuario.api.dto.UsuarioUpdateRequestDTO;
 import com.coface.usuario.db.dao.UsuarioRepository;
