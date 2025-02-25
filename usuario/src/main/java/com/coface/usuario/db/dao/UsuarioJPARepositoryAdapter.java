@@ -41,7 +41,7 @@ public class UsuarioJPARepositoryAdapter implements UsuarioRepository {
     @Override
     public Usuario saveUsuario(Usuario usuario) {
         if (usuario.getId() == null) {
-            Long id = insertarUsuarioStoredProcedureQuery(usuario);
+            Long id = usuarioJPARepository.save(usuario).getId();
             usuario.setId(id);
             return usuario;
         }
