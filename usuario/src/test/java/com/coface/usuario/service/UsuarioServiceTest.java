@@ -1,5 +1,6 @@
 package com.coface.usuario.service;
 
+import com.coface.common.NotificacionCreateRequestDTO;
 import com.coface.usuario.api.dto.UsuarioCreateRequestDTO;
 import com.coface.usuario.exception.RecursoNoEncontradoException;
 import com.coface.usuario.db.dao.UsuarioRepository;
@@ -11,8 +12,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,11 +40,26 @@ class UsuarioServiceTest {
     @Mock
     private WebClient webClient;
 
+    @Mock
+    private WebClient.RequestHeadersSpec requestHeadersSpec;
+
+    @Mock
+    private WebClient.ResponseSpec responseSpec;
+
+    @Mock
+    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
+
+    @Mock
+    private Mono<Long> longMono;
+
+    @Mock
+    private KafkaTemplate<String, NotificacionCreateRequestDTO> kafkaTemplate;
+
     private UsuarioService underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new UsuarioService(usuarioRepository, passwordEncoder, webClientBuilder);
+        underTest = new UsuarioService(usuarioRepository, passwordEncoder, webClientBuilder, kafkaTemplate);
     }
 
     @Test
@@ -131,7 +150,16 @@ class UsuarioServiceTest {
         ));
         when(usuarioRepository.saveUsuario(usuarioInput)).thenReturn(usuarioOutput);
         when(usuarioRepository.saveUsuario(usuarioConDireccion)).thenReturn(usuarioConDireccion);
+
+        /* when(webClientBuilder.baseUrl(any())).thenReturn(webClientBuilder);
         when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Long.class)).thenReturn(Mono.just(id)); */
+
+        when(kafkaTemplate.send(any(), any())).thenReturn(null);
 
         // when
         Long actual = underTest.crearUsusario(usuarioCreateRequestDTO);

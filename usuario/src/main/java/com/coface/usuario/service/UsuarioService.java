@@ -13,8 +13,10 @@ import com.coface.usuario.exception.RecursoNoEncontradoException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,14 +34,18 @@ public class UsuarioService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
+    private final KafkaTemplate<String, NotificacionCreateRequestDTO> kafkaTemplate;
+
     public UsuarioService(
             @Qualifier("usuario-jdbc") UsuarioRepository usuarioRepository,
             @Qualifier("bcrypt") PasswordEncoder passwordEncoder,
-            WebClient.Builder webClientBuilder
+            WebClient.Builder webClientBuilder,
+            KafkaTemplate<String, NotificacionCreateRequestDTO> kafkaTemplate
     ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.webClientBuilder = webClientBuilder;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public List<Usuario> getUsuarios() {
@@ -68,7 +74,7 @@ public class UsuarioService {
                 usuario
         ));
         usuarioRepository.saveUsuario(usuario);
-        webClientBuilder.baseUrl("http://localhost:8081").build().post()
+        /* webClientBuilder.baseUrl("http://localhost:8081").build().post()
                 .uri("/api/v1/notificacion")
                 .bodyValue(new NotificacionCreateRequestDTO(
                         usuario.getId(),
@@ -78,7 +84,14 @@ public class UsuarioService {
                 .bodyToMono(Long.class)
                 .doOnNext(id -> logger.info("Notificacion creada para usuario con id {}", id))
                 .doOnError(error -> logger.error(error.getMessage()))
-                .subscribe();
+                .subscribe(); */
+        kafkaTemplate.send(
+                "usuario.created",
+                new NotificacionCreateRequestDTO(
+                        usuario.getId(),
+                        usuario.getUsername()
+                )
+        );
         return usuario.getId();
     }
 
