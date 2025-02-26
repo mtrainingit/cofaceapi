@@ -77,9 +77,7 @@ public class UsuarioService {
                 .retrieve()
                 .bodyToMono(Long.class)
                 .doOnNext(id -> logger.info("Notificacion creada para usuario con id {}", id))
-                .doOnError(error -> {
-                    throw new RuntimeException(error.getMessage());
-                })
+                .doOnError(error -> logger.error(error.getMessage()))
                 .subscribe();
         return usuario.getId();
     }
